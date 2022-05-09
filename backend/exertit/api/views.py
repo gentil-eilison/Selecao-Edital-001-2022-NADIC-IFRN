@@ -86,6 +86,20 @@ def voter(request):
             }, status=status.HTTP_201_CREATED) 
 
 
+@api_view(['GET'])
+def get_voter(request, id):
+    try:
+        voter = Voter.objects.get(id=id)
+
+        if voter:
+            serialized_voter = VoterSerializer(voter)
+
+            return Response(serialized_voter.data)
+    except Voter.DoesNotExist:
+        return Response({
+            "message": "Voter doesn't exist."
+        }, status=status.HTTP_404_NOT_FOUND)
+
 @api_view(["POST"])
 def signIn(request):
     try:
@@ -157,4 +171,7 @@ def delete_candidate(request, id):
         return Response({
             "message": "That candidate doesn't exist. Try again"
         }, status=status.HTTP_404_NOT_FOUND)
-        
+
+@api_view(['PUT'])
+def vote_in_candidate(request):
+    pass
