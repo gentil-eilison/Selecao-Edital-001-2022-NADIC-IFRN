@@ -102,3 +102,59 @@ def signIn(request):
         return Response({
             "message": "This account doesn't exist"
         }, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST', 'GET'])
+def candidate(request):
+    if request.method == "POST":
+        try:
+            candidate = Candidate.objects.get(cpf=request.data["cpf"])
+
+            if candidate:
+                return Response({
+                    "message": "There is already a candidate with that cpf. Try another."
+                }, status=status.HTTP_403_FORBIDDEN)
+
+        except Candidate.DoesNotExist:
+            try:
+                Candidate.objects.create(
+                    name=request.data["name"],
+                    cpf=request.data["cpf"],
+                    birthdate=datetime.strptime(request.data["birthdate"], "%d/%m/%Y"),
+                    address=request.data["address"],
+                    current_plea=Plea.objects.get(title=request.data["current_plea"]),
+                    votes_on_plea=0
+                ) 
+                
+                return Response({
+                    "message": "Candidate succesfully created!"
+                }, status=status.HTTP_200_OK)
+            except Plea.DoesNotExist:
+                return Response({
+                    "message": "This plea doesn't exist. Pick another"
+                }, status=status.HTTP_400_BAD_REQUEST)
+    
+    elif request.method == "GET":
+        candidates = Candidate.objects.all()
+
+        serialized_candidates = CandidateSerializer(candidates, many=True)
+
+        return Response(serialized_candidates.data)
+
+
+@api_view(['DELETE'])
+def delete_candidate(request, id):
+    try:
+        candidate = Candidate.objects.get(id=id)
+
+        if candidate:
+            candidate.delete()
+
+            return Response({
+                "message": "The candidate was successfully deleted"
+            }, status=status.HTTP_200_OK)
+    except Candidate.DoesNotExist:
+        return Response({
+            "message": "That candidate doesn't exist. Try again"
+        }, status=status.HTTP_404_NOT_FOUND)
+        

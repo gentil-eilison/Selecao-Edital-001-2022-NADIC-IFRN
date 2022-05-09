@@ -21,7 +21,7 @@ class Plea(models.Model):
 class Candidate(models.Model):
     # Represents a candidate for plea
     name = models.TextField()
-    cpf = models.CharField(max_length=11, unique=True)
+    cpf = models.CharField(max_length=14, unique=True)
     birthdate = models.DateField(auto_now=False)
     address = models.TextField() # City - State
     current_plea = models.ForeignKey(Plea, on_delete=models.CASCADE)

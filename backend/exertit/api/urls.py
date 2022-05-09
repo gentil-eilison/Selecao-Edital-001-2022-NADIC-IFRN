@@ -5,5 +5,7 @@ urlpatterns = [
     path("plea/", views.create_plea),
     path("plea/<id>/", views.plea),
     path("voter/", views.voter),
-    path("signIn/", views.signIn)
+    path("signIn/", views.signIn),
+    path("candidate/", views.candidate),
+    path("candidate/<id>/", views.delete_candidate)
 ]
