@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 class Voter(models.Model):
     # Represents a voter and a user
-    cpf = models.CharField(max_length=11, unique=True)
+    cpf = models.CharField(max_length=14, unique=True)
     password = models.CharField(max_length=30)
     token = models.CharField(max_length=255) # Auto-generated
 

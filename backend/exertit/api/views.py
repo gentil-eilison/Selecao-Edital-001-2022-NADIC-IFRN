@@ -4,6 +4,8 @@ from rest_framework import status
 from master.models import Plea, Candidate, Voter
 from api.serializers import PleaSerializer, CandidateSerializer, VoterSerializer
 
+from uuid import uuid4
+
 from datetime import datetime
 
 @api_view(['POST', 'GET'])
@@ -54,4 +56,49 @@ def plea(request, id):
     except Plea.DoesNotExist:
         return Response({
             "message": "This plea does not exist"
+        }, status=status.HTTP_404_NOT_FOUND)
+
+
+@api_view(['POST'])
+def voter(request):
+    try:
+        voter = Voter.objects.get(cpf=request.data["cpf"])
+
+        if voter:
+            return Response({
+                "message": "This voter already exists. Try using another CPF."
+            }, status=status.HTTP_409_CONFLICT)
+    except Voter.DoesNotExist:
+        if request.data["password"] != request.data["confirm_password"]:
+            return Response({
+                "message": "Your passwords don't match. Try again"
+            }, status=status.HTTP_406_NOT_ACCEPTABLE)
+        
+        else:
+            Voter.objects.create(
+                cpf=request.data["cpf"],
+                password=request.data["password"],
+                token=uuid4()
+            )
+
+            return Response({
+                "message": "Voter created successfully",
+            }, status=status.HTTP_201_CREATED) 
+
+
+@api_view(["POST"])
+def signIn(request):
+    try:
+        voter = Voter.objects.get(cpf=request.data["cpf"], password=request.data["password"])
+
+        voter.token = uuid4()
+
+        voter.save()
+
+        serialized_voter = VoterSerializer(voter)
+
+        return Response(serialized_voter.data)
+    except Voter.DoesNotExist:
+        return Response({
+            "message": "This account doesn't exist"
         }, status=status.HTTP_404_NOT_FOUND)
