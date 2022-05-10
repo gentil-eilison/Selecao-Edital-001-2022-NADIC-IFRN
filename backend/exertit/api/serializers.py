@@ -21,7 +21,8 @@ class PleaSerializer(serializers.ModelSerializer):
             "endDate",
             "kind",
             "state",
-            "voted_by"
+            "voted_by",
+            "max_candidates"
         ]
 
 

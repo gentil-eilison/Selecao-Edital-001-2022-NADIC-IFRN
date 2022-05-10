@@ -8,6 +8,46 @@ from uuid import uuid4
 
 from datetime import datetime
 
+def vote_in_candidate(request, plea_id):
+    try:
+        voter = Voter.objects.get(id=request.data["voter"])
+        candidate = Candidate.objects.get(id=request.data["candidate"])
+        voting_plea = None
+
+        if voter and candidate:
+            try:
+                voting_plea = Plea.objects.get(voted_by=voter)
+
+                if voting_plea is not None:
+                    return Response({
+                    "message": "This user has already voted in this plea. Please, vote in another one."
+                    }, status=status.HTTP_403_FORBIDDEN)
+            except Plea.DoesNotExist:
+                try:
+                    voting_plea = Plea.objects.get(id=plea_id)
+
+                    voting_plea.voted_by.add(voter)
+
+                    candidate.votes_on_plea += 1
+
+                    candidate.save()
+
+                    return Response({
+                        "message": "Voted!"
+                    }, status=status.HTTP_200_OK)
+
+                except Plea.DoesNotExist:
+                    return Response({
+                            "message:" "There aren't any pleas with that id"
+                        }, status=status.HTTP_404_NOT_FOUND)
+                    
+
+    except (Voter.DoesNotExist, Candidate.DoesNotExist):
+        return Response({
+            "message": "These users or this plea aren't/ins't in our database."
+        }, status=status.HTTP_404_NOT_FOUND)
+
+
 @api_view(['POST', 'GET'])
 def create_plea(request):
     try:
@@ -30,7 +70,8 @@ def create_plea(request):
             startDate=datetime.strptime(request.data["startDate"], "%d/%m/%Y"),
             endDate=datetime.strptime(request.data["endDate"], "%d/%m/%Y"),
             kind=request.data["kind"],
-            state=False
+            state=False,
+            max_candidates=request.data["max_candidates"]
         )
 
         return Response({
@@ -38,25 +79,29 @@ def create_plea(request):
         }, status=status.HTTP_201_CREATED)
 
 
-@api_view(['DELETE', 'GET'])
+@api_view(['DELETE', 'GET', 'PUT'])
 def plea(request, id):
-    try:
-        plea = Plea.objects.get(id=id)
+    if request.method == "PUT":
+        response = vote_in_candidate(request, id)
+        return response
+    else:
+        try:
+            plea = Plea.objects.get(id=id)
 
-        if request.method == "DELETE":
-            plea.delete()
+            if request.method == "DELETE":
+                plea.delete()
+                return Response({
+                    "message": "The plea was deleted"
+                }, status=status.HTTP_204_NO_CONTENT)
+
+            elif request.method == "GET":
+                serialized_plea = PleaSerializer(plea)
+                return Response(serialized_plea.data)
+
+        except Plea.DoesNotExist:
             return Response({
-                "message": "The plea was deleted"
-            }, status=status.HTTP_204_NO_CONTENT)
-
-        elif request.method == "GET":
-            serialized_plea = PleaSerializer(plea)
-            return Response(serialized_plea.data)
-
-    except Plea.DoesNotExist:
-        return Response({
-            "message": "This plea does not exist"
-        }, status=status.HTTP_404_NOT_FOUND)
+                "message": "This plea does not exist"
+            }, status=status.HTTP_404_NOT_FOUND)
 
 
 @api_view(['POST'])
@@ -170,37 +215,4 @@ def delete_candidate(request, id):
     except Candidate.DoesNotExist:
         return Response({
             "message": "That candidate doesn't exist. Try again"
-        }, status=status.HTTP_404_NOT_FOUND)
-
-@api_view(['PUT'])
-def vote_in_candidate(request, plea_id):
-    try:
-        voter = Voter.objects.get(id=request.data["voter"])
-        candidate = Candidate.objects.get(id=request.data["candidate"])
-        voting_plea = None
-
-        if voter and candidate:
-            try:
-                voting_plea = Plea.objects.get(voted_by=candidate)
-
-                if voting_plea:
-                    return Response({
-                    "message": "This user has already voted in this plea. Please, vote in another one."
-                    }, status=status.HTTP_403_FORBIDDEN)
-
-                voting_plea.voted_by.add(candidate)
-            except Plea.DoesNotExist:
-                voting_plea = Plea.objects.get(id=plea_id)
-
-                voting_plea.voted_by.add(candidate)
-
-                candidate.votes_on_plea += 1
-
-                return Response({
-                    "message": "Voted!"
-                }, status=status.HTTP_200_OK)
-
-    except (Voter.DoesNotExist, Candidate.DoesNotExist):
-        return Response({
-            "message": "These users or this plea aren't/ins't in our database."
         }, status=status.HTTP_404_NOT_FOUND)

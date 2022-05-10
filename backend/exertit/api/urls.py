@@ -8,5 +8,5 @@ urlpatterns = [
     path("voter/<id>/", views.get_voter),
     path("signIn/", views.signIn),
     path("candidate/", views.candidate),
-    path("candidate/<id>/", views.delete_candidate)
+    path("candidate/<id>/", views.delete_candidate),
 ]

@@ -16,6 +16,7 @@ class Plea(models.Model):
     kind = models.TextField()
     state = models.BooleanField(default=False)
     voted_by = models.ManyToManyField(Voter)
+    max_candidates = models.BigIntegerField(default=2)
 
 
 class Candidate(models.Model):
