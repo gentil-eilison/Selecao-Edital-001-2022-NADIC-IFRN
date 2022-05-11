@@ -169,6 +169,8 @@ def candidate(request):
         try:
             candidate = Candidate.objects.get(cpf=request.data["cpf"])
 
+            print(candidate)
+
             if candidate:
                 return Response({
                     "message": "There is already a candidate with that cpf. Try another."
@@ -176,22 +178,52 @@ def candidate(request):
 
         except Candidate.DoesNotExist:
             try:
+                form_plea = Plea.objects.get(title=request.data["current_plea"])
+            except Plea.DoesNotExist:
+                return Response({
+                    "message": "This plea doesn't exist. Pick another"
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
+
+            try:
+                plea_candidates = Candidate.objects.filter(current_plea=form_plea)
+                print("UAUAUAUA=======")
+                print(plea_candidates)
+
+                if plea_candidates.count() == form_plea.max_candidates:
+                    return Response({
+                        "message": "The number of candidates of this plea was exceeded."
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
+                else:
+                    Candidate.objects.create(
+                            name=request.data["name"],
+                            cpf=request.data["cpf"],
+                            birthdate=datetime.strptime(request.data["birthdate"], "%d/%m/%Y"),
+                            address=request.data["address"],
+                            current_plea=Plea.objects.get(title=request.data["current_plea"]),
+                            votes_on_plea=0
+                        ) 
+                    
+                    return Response({
+                            "message": "Candidate succesfully created!"
+                        }, status=status.HTTP_200_OK)
+
+            except Candidate.DoesNotExist:
                 Candidate.objects.create(
-                    name=request.data["name"],
-                    cpf=request.data["cpf"],
-                    birthdate=datetime.strptime(request.data["birthdate"], "%d/%m/%Y"),
-                    address=request.data["address"],
-                    current_plea=Plea.objects.get(title=request.data["current_plea"]),
-                    votes_on_plea=0
+                        name=request.data["name"],
+                        cpf=request.data["cpf"],
+                        birthdate=datetime.strptime(request.data["birthdate"], "%d/%m/%Y"),
+                        address=request.data["address"],
+                        current_plea=Plea.objects.get(title=request.data["current_plea"]),
+                        votes_on_plea=0
                 ) 
                 
                 return Response({
                     "message": "Candidate succesfully created!"
                 }, status=status.HTTP_200_OK)
-            except Plea.DoesNotExist:
-                return Response({
-                    "message": "This plea doesn't exist. Pick another"
-                }, status=status.HTTP_400_BAD_REQUEST)
+            
+                
     
     elif request.method == "GET":
         candidates = Candidate.objects.all()
