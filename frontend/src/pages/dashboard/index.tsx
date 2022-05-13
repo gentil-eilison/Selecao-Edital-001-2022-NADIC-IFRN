@@ -1,16 +1,7 @@
-import { useContext } from "react"
-import { UserContext } from "../../contexts/UserContext"
-import { useEffect } from "react"
-import { useRouter } from "next/router"
+import { GetServerSideProps } from "next"
+import nookies from "nookies"
 
 const DashBoard = () => {
-
-    const { isAuthenticated } = useContext(UserContext)
-    const router = useRouter()
-
-    // useEffect(() => {
-    //     if (isAuthenticated) router.push("/")
-    // }, [isAuthenticated])
 
     return (
         <h1>Welcome to the dashboard!</h1>
@@ -18,3 +9,20 @@ const DashBoard = () => {
 }
 
 export default DashBoard
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+    const { 'exertit.token': token } =  nookies.get(context)  
+ 
+   if (!token) {
+     return {
+       redirect: {
+         destination: "/",
+         permanent: false
+       }
+     }
+   }
+ 
+   return {
+     props: {}
+   }
+ }

@@ -7,8 +7,8 @@ import Link from "next/link"
 import { GetServerSideProps } from "next"
 
 import api from "../services/api"
-import Cookie from "universal-cookie"
 import { UserContext } from "../contexts/UserContext"
+import nookies from "nookies"
 
 import { useState } from "react"
 import { useToast } from "@chakra-ui/react"
@@ -97,12 +97,9 @@ export default function Home() {
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const cookie = new Cookie()
-  const authCookie = cookie.get("exertit.cookie")
+   const { 'exertit.token': token } =  nookies.get(context)  
 
-  console.log("teste: " + authCookie)
-
-  if (authCookie) {
+  if (token) {
     return {
       redirect: {
         destination: "/dashboard",

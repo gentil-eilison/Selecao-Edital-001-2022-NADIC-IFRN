@@ -1,8 +1,7 @@
 import { createContext } from "react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/router"
-
-import Cookie from "universal-cookie"
+import { setCookie, parseCookies } from "nookies"
 import api from "../services/api"
 
 type UserData = {
@@ -33,12 +32,11 @@ export function UserProvider({ children } : UserProviderData) {
     
 
     let isAuthenticated = !!user
-    const authCookie = new Cookie()
 
     useEffect(() => {
         console.log("Vou renderizar context")
         async function getVoterByTokenAndUpdateStatus() {
-            const token = authCookie.get("exertit.cookie")
+            const { 'exertit.token' : token } = parseCookies()
 
             if (token) {
                 const res = await api.get(`voter/${token}/`).then(response => response.data)
@@ -61,9 +59,8 @@ export function UserProvider({ children } : UserProviderData) {
             .catch(error => error.response)
         
         if (response.status === 200) {
-            authCookie.set("exertit.cookie", response.data.token, {
+            setCookie(undefined, 'exertit.token', response.data.token, {
                 maxAge: 60 * 60 * 1 // 1 hour
-            
             })
             setUser({ cpf: cpf })
             router.push("/dashboard")
@@ -76,7 +73,7 @@ export function UserProvider({ children } : UserProviderData) {
     
     function logOut() {
         setUser(false)
-        authCookie.remove("exertit.cookie")
+        // authCookie.remove("exertit.cookie")
         router.push("/")
     }
 
