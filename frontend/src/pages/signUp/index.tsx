@@ -1,12 +1,13 @@
 import { toast, VStack } from "@chakra-ui/react"
 import { Heading } from "@chakra-ui/react"
 import { Flex } from "@chakra-ui/react"
-import { FormControl, FormLabel, Input, Button, ButtonGroup } from "@chakra-ui/react"
+import { FormControl, FormLabel, Input, Button } from "@chakra-ui/react"
 import Image from "next/image"
 
 import { useState } from "react"
 import { useRouter } from 'next/router'
 import { useToast } from '@chakra-ui/react'
+import { useEffect } from "react"
 
 import api from "../../services/api"
 
@@ -18,6 +19,8 @@ const SignUp = () => {
     const [confirmPassword, setConfirmPassword] = useState<string | false>(false)
 
     const [error, setError] = useState<boolean>(false)
+    const [warning, setWarning] = useState<boolean>(false)
+    const [success, setSuccess] = useState<boolean>(false)
 
     const router = useRouter()
     const toast = useToast()
@@ -29,14 +32,30 @@ const SignUp = () => {
             password: password,
             confirm_password: confirmPassword
         }).then(response => {
-            console.log(response)
-            router.push("/")
-        }).catch(error => setError(true))
+            if (response.status === 201) {
+                setSuccess(true)
+                router.push("/")
+            }
+        }).catch(error => {
+            if (error.response.status === 409) {
+                setWarning(true)
+            } else {
+                setError(true)
+            }
+        })
     }
+
+    useEffect(() => {
+        setWarning(false)
+        setError(false)
+        setSuccess(false)
+    })
 
     return (
         <VStack height="100vh" alignItems="center" justifyContent="center">
             { error && toast({title: 'Houve um erro ao criar a conta.', status:'error'}) }
+            { warning && toast({title: 'Já existe um usuário com esse CPF.', status: 'warning'}) }
+            { success && toast({title: 'Conta criada com sucesso!.', status: 'success'}) }
             <header>
                 <Flex flexDir="column" justifyContent="center" alignItems="center" gap={3}>
                     <Image width={59} height={59} src={infoCircle} alt="Exclamation mark in a circle"/>

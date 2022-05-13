@@ -3,6 +3,7 @@ import { Flex } from "@chakra-ui/react"
 import { FormControl, FormLabel, Input, Button, ButtonGroup } from "@chakra-ui/react"
 // import { Img } from "@chakra-ui/react"
 import Image  from "next/image"
+import Link from "next/link"
 
 import styles from "../styles/Home.module.css"
 import award from "../assets/icons/award.svg"
@@ -41,7 +42,7 @@ export default function Home() {
                     <Image src={login} alt="Door opening"/> Login
                 </Button>
                 
-                <Button _hover={{ bg: "#53c065" }}><a href="/signUp">Criar conta</a></Button>
+                <Link href="/signUp"><Button _hover={{ bg: "#53c065" }}>Criar conta</Button></Link>
               </ButtonGroup>
           </form>
       </Flex>
