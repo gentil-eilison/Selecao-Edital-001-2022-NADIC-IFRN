@@ -1,5 +1,5 @@
 import { createContext } from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/router"
 
 import Cookie from "universal-cookie"
@@ -17,7 +17,7 @@ type SignInData = {
 type UserContextData = {
     user: UserData | boolean,
     isAuthenticated: boolean,
-    signIn: (data: SignInData) => Promise<void>
+    signIn: (data: SignInData) => Promise<void | string>
     logOut: () => void
 }
 
@@ -30,31 +30,52 @@ export const UserContext = createContext({} as UserContextData)
 export function UserProvider({ children } : UserProviderData) {
     const [user, setUser] = useState<UserData | false>(false)
     const router = useRouter()
+    
 
-    const isAuthenticated = !!user
+    let isAuthenticated = !!user
     const authCookie = new Cookie()
 
+    useEffect(() => {
+        console.log("Vou renderizar context")
+        async function getVoterByTokenAndUpdateStatus() {
+            const token = authCookie.get("exertit.cookie")
+
+            if (token) {
+                const res = await api.get(`voter/${token}/`).then(response => response.data)
+                setUser(res)
+            } else {
+                setUser(false)
+            }
+        }
+
+        getVoterByTokenAndUpdateStatus()
+        
+    }, [])
+
     async function signIn({ cpf, password } : SignInData) {
-        const { token } = await api.post("signIn/", {
+        const response = await api.post("signIn/", {
             cpf, 
             password
         })
-            .then(response => response.data)
-            .catch(error => console.log(error))
+            .then(response => response)
+            .catch(error => error.response)
         
-        console.log(token)
-        
-        authCookie.set("exertit.cookie", token, {
-            maxAge: 60 * 60 * 1 // 1 hour
-        })
+        if (response.status === 200) {
+            authCookie.set("exertit.cookie", response.data.token, {
+                maxAge: 60 * 60 * 1 // 1 hour
+            
+            })
+            setUser({ cpf: cpf })
+            router.push("/dashboard")
 
-        setUser({ cpf: cpf })
-
-        router.push("/dashboard")
+        } else if(response.status === 404) {
+            console.log("Entrei aqui no errado")
+            return "Essa conta não existe!"
+        }
     }
     
     function logOut() {
-        setUser(null)
+        setUser(false)
         authCookie.remove("exertit.cookie")
         router.push("/")
     }

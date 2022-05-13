@@ -132,9 +132,9 @@ def voter(request):
 
 
 @api_view(['GET'])
-def get_voter(request, id):
+def get_voter(request, token):
     try:
-        voter = Voter.objects.get(id=id)
+        voter = Voter.objects.get(token=token)
 
         if voter:
             serialized_voter = VoterSerializer(voter)
