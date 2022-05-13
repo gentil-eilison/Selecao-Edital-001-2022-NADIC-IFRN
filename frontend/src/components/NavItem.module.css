@@ -1,0 +1,20 @@
+.navItem {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: .7rem;
+    padding: 0 1rem;
+    
+    /* border: solid 2px green; */
+    color: #444;
+    font-family: 'Inter', Arial, sans-serif;
+    font-weight: bold;
+}
+
+.navItem:hover {
+    color: white;
+}
+
+img.navItemImage {
+    color: #75D685;
+}

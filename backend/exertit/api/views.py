@@ -67,8 +67,8 @@ def create_plea(request):
     except Plea.DoesNotExist: 
         Plea.objects.create(
             title=request.data["title"],
-            startDate=datetime.strptime(request.data["startDate"], "%d/%m/%Y"),
-            endDate=datetime.strptime(request.data["endDate"], "%d/%m/%Y"),
+            startDate=datetime.strptime(request.data["startDate"], "%Y-%m-%d"),
+            endDate=datetime.strptime(request.data["endDate"], "%Y-%m-%d"),
             kind=request.data["kind"],
             state=False,
             max_candidates=request.data["max_candidates"]
