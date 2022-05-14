@@ -2,7 +2,8 @@ import Image from "next/image"
 import { Button, FormControl, Input, FormLabel, Flex, Heading } from "@chakra-ui/react"
 
 import { useState, useEffect } from "react"
-import { useRouter} from "next/router"
+import { useRouter } from "next/router"
+import { useToast } from "@chakra-ui/react"
 import api from "../../services/api"
 
 import addPlea from "../../assets/icons/add-plea.svg"
@@ -15,6 +16,7 @@ const AddPlea = () => {
     const [maxCandidates, setMaxCandidates] = useState<string | false>(false)
 
     const router = useRouter()
+    const toast = useToast()
 
     const [success, setSuccess] = useState<boolean>(false)
     const [error, setError] = useState<boolean>(false)
@@ -49,6 +51,8 @@ const AddPlea = () => {
 
     return (
         <Flex height="100%" flexDirection="column" justifyContent='center' alignItems="center" gap={10}>
+            { error && toast({title: 'Já há um pleito com esse nome.', status:'error'}) }
+            { success && toast({title: 'Pleito cadastrado com sucesso!.', status: 'success'}) }
             <Flex flexDirection="column" alignItems='center'>
                 <Image src={addPlea} width={59} height={59} alt="A box containing an arrow ponting downwards"/>
                 <Heading as="h1">Adicionar Pleito</Heading>
