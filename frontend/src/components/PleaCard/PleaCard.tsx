@@ -37,7 +37,7 @@ const PleaCard = ({ plea }: PleaCardData) => {
             <Flex flexDirection="column" justifyContent="space-around">
                 <p><strong>Situação</strong>: { plea.state === true ? 'Encerrado' : 'Em Andamento' }</p>
                 <Flex gap={3}>
-                    <Button _hover={{ bg: "#53c065" }}><Link href="/votePlea/">Votar</Link></Button>
+                    <Button _hover={{ bg: "#53c065" }}><Link href={`/votePlea/${plea.id}`}>Votar</Link></Button>
                     { plea.state === true && <Button _hover={{ bg: "#53c065" }}>
                         <Link href="/seeResults/">Resultados</Link></Button>}    
                 </Flex>
