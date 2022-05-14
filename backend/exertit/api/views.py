@@ -178,7 +178,7 @@ def candidate(request):
 
         except Candidate.DoesNotExist:
             try:
-                form_plea = Plea.objects.get(title=request.data["current_plea"])
+                form_plea = Plea.objects.get(id=request.data["current_plea"])
             except Plea.DoesNotExist:
                 return Response({
                     "message": "This plea doesn't exist. Pick another"
@@ -199,9 +199,9 @@ def candidate(request):
                     Candidate.objects.create(
                             name=request.data["name"],
                             cpf=request.data["cpf"],
-                            birthdate=datetime.strptime(request.data["birthdate"], "%d/%m/%Y"),
+                            birthdate=datetime.strptime(request.data["birthdate"], "%Y-%m-%d"),
                             address=request.data["address"],
-                            current_plea=Plea.objects.get(title=request.data["current_plea"]),
+                            current_plea=Plea.objects.get(id=request.data["current_plea"]),
                             votes_on_plea=0
                         ) 
                     
